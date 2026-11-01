@@ -1,0 +1,2 @@
+# AFRM prototype has NO third-party runtime dependencies (standard library only).
+# Developed and tested on Python 3.12.
