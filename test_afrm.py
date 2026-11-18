@@ -77,6 +77,20 @@ class TestAFRM(unittest.TestCase):
         self.assertEqual(len(results), 20)
         self.assertEqual([f["flight_id"] for f, _ in rejected], ["AF901", "AF902", "AF903"])
 
+    def test_nan_and_infinity_rejected(self):
+        for bad in (float("nan"), float("inf"), float("-inf")):
+            self.assertTrue(validator.validate_flight(dict(REF, fuel_onboard_kg=bad)), bad)
+            self.assertTrue(validator.validate_flight(dict(REF, distance_km=bad)), bad)
+
+    def test_missing_field_rejected_not_crash(self):
+        flight = dict(REF)
+        del flight["wind_kph"]
+        self.assertTrue(validator.validate_flight(flight))
+
+    def test_non_numeric_value_rejected_not_crash(self):
+        self.assertTrue(validator.validate_flight(dict(REF, fuel_onboard_kg="abc")))
+        self.assertTrue(validator.validate_flight(dict(REF, fuel_onboard_kg=True)))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
