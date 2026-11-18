@@ -1,10 +1,27 @@
 """validator.py - range and unit checks, run before any calculation."""
 import config
+import math
 
+REQUIRED_FIELDS = ["distance_km", "alternate_km", "tas_kph", "wind_kph",
+                    "burn_rate_kgph", "fuel_capacity_kg", "fuel_onboard_kg"]
+
+def is_valid_number(value):
+    """Return True if value is a number (int or float) and not NaN."""
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 def validate_flight(f):
     """Return a list of error messages. An empty list means the flight is valid."""
     errors = []
+
+    # every field must exist and hold a finite number
+    for name in REQUIRED_FIELDS:
+        if name not in f:
+            errors.append(f"{name} is missing")
+        elif not is_valid_number(f[name]):
+            errors.append(f"{name} is not a valid number")
+    if errors:
+        return errors
+
     for name, (low, high) in config.LIMITS.items():
         if not low <= f[name] <= high:
             errors.append(f"{name}={f[name]} outside {low} to {high}")
